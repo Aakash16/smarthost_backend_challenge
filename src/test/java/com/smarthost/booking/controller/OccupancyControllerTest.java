@@ -1,7 +1,6 @@
-package com.smarthost.booking;
+package com.smarthost.booking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.smarthost.booking.controller.OccupancyController;
 import com.smarthost.booking.model.OccupancyRequest;
 import com.smarthost.booking.model.OccupancyResponse;
 import com.smarthost.booking.service.OccupancyService;
