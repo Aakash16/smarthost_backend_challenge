@@ -1,0 +1,10 @@
+build/
+.gradle/
+.idea/
+.vscode/
+bin/
+*.iml
+.DS_Store
+.git/
+.gitignore
+gradle.properties
