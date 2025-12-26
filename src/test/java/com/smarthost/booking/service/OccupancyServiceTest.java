@@ -2,7 +2,6 @@ package com.smarthost.booking.service;
 
 import com.smarthost.booking.config.HotelConfiguration;
 import com.smarthost.booking.model.OccupancyRequest;
-import com.smarthost.booking.model.OccupancyResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -20,7 +19,7 @@ class OccupancyServiceTest {
 
     @BeforeEach
     void setUp() {
-        HotelConfiguration config = new HotelConfiguration();
+        var config = new HotelConfiguration();
         ReflectionTestUtils.setField(config, "premiumThreshold", 100.0);
         ReflectionTestUtils.setField(config, "minRooms", 1L);
 
@@ -42,12 +41,12 @@ class OccupancyServiceTest {
             long expectedUsageEconomy,
             double expectedRevenueEconomy) {
 
-        OccupancyRequest request = new OccupancyRequest(premiumRooms, economyRooms, potentialGuests);
-        OccupancyResponse response = occupancyService.calculateOccupancy(request);
+        var request = new OccupancyRequest(premiumRooms, economyRooms, potentialGuests);
+        var response = occupancyService.calculateOccupancy(request);
 
-        assertEquals(expectedUsagePremium, response.getUsagePremium());
-        assertEquals(expectedRevenuePremium, response.getRevenuePremium(), 0.001);
-        assertEquals(expectedUsageEconomy, response.getUsageEconomy());
-        assertEquals(expectedRevenueEconomy, response.getRevenueEconomy(), 0.001);
+        assertEquals(expectedUsagePremium, response.usagePremium());
+        assertEquals(expectedRevenuePremium, response.revenuePremium(), 0.001);
+        assertEquals(expectedUsageEconomy, response.usageEconomy());
+        assertEquals(expectedRevenueEconomy, response.revenueEconomy(), 0.001);
     }
 }

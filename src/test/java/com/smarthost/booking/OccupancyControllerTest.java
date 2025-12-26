@@ -38,7 +38,7 @@ class OccupancyControllerTest {
                 when(occupancyService.calculateOccupancy(any()))
                                 .thenReturn(new OccupancyResponse(1L, 100.0, 1L, 50.0));
 
-                OccupancyRequest request = new OccupancyRequest(
+                var request = new OccupancyRequest(
                                 1L,
                                 1L,
                                 List.of(50.0, 100.0));
@@ -56,7 +56,7 @@ class OccupancyControllerTest {
 
         @Test
         void emptyGuestList_returns400() throws Exception {
-                OccupancyRequest request = new OccupancyRequest(
+                var request = new OccupancyRequest(
                                 5L,
                                 5L,
                                 List.of());
@@ -74,7 +74,7 @@ class OccupancyControllerTest {
                         "1, -1"
         })
         void invalidRoomCounts_returns400(long p, long e) throws Exception {
-                OccupancyRequest request = new OccupancyRequest(p, e, List.of(50.0, 150.0));
+                var request = new OccupancyRequest(p, e, List.of(50.0, 150.0));
 
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
