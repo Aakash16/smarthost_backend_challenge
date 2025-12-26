@@ -1,8 +1,11 @@
 package com.smarthost.booking.service;
 
 import com.smarthost.booking.config.HotelConfiguration;
+import com.smarthost.booking.exception.InvalidBookingRequestException;
 import com.smarthost.booking.model.OccupancyRequest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -10,6 +13,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class OccupancyServiceTest {
 
@@ -48,5 +52,16 @@ class OccupancyServiceTest {
         assertEquals(expectedRevenuePremium, response.revenuePremium(), 0.001);
         assertEquals(expectedUsageEconomy, response.usageEconomy());
         assertEquals(expectedRevenueEconomy, response.revenueEconomy(), 0.001);
+    }
+
+    @Test
+    @DisplayName("Should throw InvalidBookingRequestException for negative guest bids")
+    void shouldThrowExceptionForNegativeGuestBids() {
+        var request = new OccupancyRequest(5L, 5L, List.of(100.0, -10.0, 50.0));
+
+        var exception = assertThrows(InvalidBookingRequestException.class,
+                () -> occupancyService.calculateOccupancy(request));
+
+        assertEquals("All guest willingness to pay values must be non-negative", exception.getMessage());
     }
 }

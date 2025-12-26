@@ -1,6 +1,7 @@
 package com.smarthost.booking.service;
 
 import com.smarthost.booking.config.HotelConfiguration;
+import com.smarthost.booking.exception.InvalidBookingRequestException;
 import com.smarthost.booking.model.OccupancyRequest;
 import com.smarthost.booking.model.OccupancyResponse;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,11 @@ public class OccupancyServiceImpl implements OccupancyService {
                 var freeEconomy = request.economyRooms();
 
                 var threshold = hotelConfiguration.getPremiumThreshold();
+
+                if (guests.stream().anyMatch(g -> g < 0)) {
+                        throw new InvalidBookingRequestException(
+                                        "All guest willingness to pay values must be non-negative");
+                }
 
                 var premiumGuests = guests.stream()
                                 .filter(p -> p >= threshold)

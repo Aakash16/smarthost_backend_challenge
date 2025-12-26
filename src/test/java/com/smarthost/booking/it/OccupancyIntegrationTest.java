@@ -162,4 +162,17 @@ class OccupancyIntegrationTest {
                                 .andExpect(jsonPath("$.usageEconomy").value(3))
                                 .andExpect(jsonPath("$.revenueEconomy").value(90.0));
         }
+
+        @Test
+        @DisplayName("Business Validation: Negative guest bids return 400")
+        void negativeGuestBids_returns400() throws Exception {
+                var request = new OccupancyRequest(5L, 5L, List.of(100.0, -50.0, 20.0));
+
+                mockMvc.perform(post("/occupancy")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.error")
+                                                .value("All guest willingness to pay values must be non-negative"));
+        }
 }
