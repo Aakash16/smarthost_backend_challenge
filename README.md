@@ -91,3 +91,33 @@ Use the following raw JSON file/structure as mock data for potential guests in y
    (output) Usage Premium: 2 (EUR 583)
    (output) Usage Economy: 4 (EUR 189.99)
    ```
+
+## Getting Started (Docker)
+
+To run the application without installing local dependencies (Java/Gradle), you can use Docker:
+
+1. **Build the image**:
+   ```bash
+   docker build -t smart-host-booking .
+   ```
+
+2. **Run the container**:
+   ```bash
+   # Mapping to a different port if 8080 is busy (e.g., 9090)
+   docker run -e PORT=9090 -p 9090:9090 smart-host-booking
+   ```
+
+## API Endpoints & Monitoring
+
+Once the application is running, the following endpoints are available:
+
+### Core API
+- **POST `/occupancy`**: Main endpoint for room allocation calculation.
+
+### Documentation
+- **Swagger UI**: `http://localhost:9090/swagger-ui.html`
+- **OpenAPI Docs**: `http://localhost:9090/v3/api-docs`
+
+### Monitoring (Actuator)
+- **Health Check**: `http://localhost:9090/actuator/health` (Shows detailed system health)
+- **App Info**: `http://localhost:9090/actuator/info` (Shows application metadata)
