@@ -6,6 +6,8 @@ import com.smarthost.booking.model.OccupancyRequest;
 import com.smarthost.booking.model.OccupancyResponse;
 import com.smarthost.booking.service.OccupancyService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,7 +36,7 @@ class OccupancyControllerTest {
         @Test
         void validRequest_returns200AndJson() throws Exception {
                 when(occupancyService.calculateOccupancy(any()))
-                                .thenReturn(new OccupancyResponse(1L, 100L, 1L, 50.0));
+                                .thenReturn(new OccupancyResponse(1L, 100.0, 1L, 50.0));
 
                 OccupancyRequest request = new OccupancyRequest(
                                 1L,
@@ -65,38 +67,14 @@ class OccupancyControllerTest {
                                 .andExpect(status().isBadRequest());
         }
 
-        @Test
-        void zeroRooms_returns400() throws Exception {
-                OccupancyRequest request = new OccupancyRequest(
-                                0L,
-                                0L,
-                                List.of(50.0, 150.0));
-
-                mockMvc.perform(post("/occupancy")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest());
-        }
-
-        @Test
-        void negativePremiumRooms_returns_BadRequest() throws Exception {
-                OccupancyRequest request = new OccupancyRequest(
-                                -1L,
-                                1L,
-                                List.of(100.0));
-
-                mockMvc.perform(post("/occupancy")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest());
-        }
-
-        @Test
-        void negativeEconomyRooms_returns400() throws Exception {
-                OccupancyRequest request = new OccupancyRequest(
-                                1L,
-                                -1L,
-                                List.of(50.0));
+        @ParameterizedTest(name = "Invalid rooms: P={0}, E={1}")
+        @CsvSource({
+                        "0, 0",
+                        "-1, 1",
+                        "1, -1"
+        })
+        void invalidRoomCounts_returns400(long p, long e) throws Exception {
+                OccupancyRequest request = new OccupancyRequest(p, e, List.of(50.0, 150.0));
 
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
