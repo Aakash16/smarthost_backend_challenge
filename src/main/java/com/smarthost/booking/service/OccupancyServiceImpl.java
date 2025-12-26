@@ -19,45 +19,60 @@ public class OccupancyServiceImpl implements OccupancyService {
 
         @Override
         public OccupancyResponse calculateOccupancy(OccupancyRequest request) {
-                var guests = request.potentialGuests();
-                var freePremium = request.premiumRooms();
-                var freeEconomy = request.economyRooms();
+                var potentialGuests = request.potentialGuests();
+                var availablePremiumRooms = request.premiumRooms();
+                var availableEconomyRooms = request.economyRooms();
+
+                validatePotentialGuests(potentialGuests);
 
                 var threshold = hotelConfiguration.getPremiumThreshold();
 
-                if (guests.stream().anyMatch(g -> g < 0)) {
-                        throw new InvalidBookingRequestException(
-                                        "All guest willingness to pay values must be non-negative");
-                }
+                var premiumGuests = filterAndSortGuests(potentialGuests, bid -> bid >= threshold);
+                var economyGuests = filterAndSortGuests(potentialGuests, bid -> bid < threshold);
 
-                var premiumGuests = guests.stream()
-                                .filter(p -> p >= threshold)
-                                .sorted(Comparator.reverseOrder())
-                                .toList();
+                var premiumUsage = (long) Math.min(availablePremiumRooms, premiumGuests.size());
+                var premiumRevenue = calculateRevenue(premiumGuests, premiumUsage);
 
-                var economyGuests = guests.stream()
-                                .filter(p -> p < threshold)
-                                .sorted(Comparator.reverseOrder())
-                                .toList();
+                var remainingPremium = availablePremiumRooms - premiumUsage;
+                var economyOverbooked = Math.max(0, economyGuests.size() - availableEconomyRooms);
+                var upgrades = Math.min(remainingPremium, (long) economyOverbooked);
 
-                var premUsage = Math.min(freePremium, premiumGuests.size());
-                var premRevenue = premiumGuests.stream().limit(premUsage).mapToDouble(Double::doubleValue).sum();
+                var upgradeRevenue = calculateRevenue(economyGuests, upgrades);
 
-                var remainingPrem = freePremium - premUsage;
-                var econOverbooked = Math.max(0, economyGuests.size() - freeEconomy);
-                var upgrades = Math.min(remainingPrem, econOverbooked);
-
-                var upgradeRevenue = economyGuests.stream().limit(upgrades).mapToDouble(Double::doubleValue).sum();
-
-                var econUsage = Math.min(freeEconomy, economyGuests.size() - upgrades);
-                var econRevenue = economyGuests.stream().skip(upgrades).limit(econUsage)
+                var economyUsage = (long) Math.min(availableEconomyRooms, economyGuests.size() - upgrades);
+                var economyRevenue = economyGuests.stream()
+                                .skip(upgrades)
+                                .limit(economyUsage)
                                 .mapToDouble(Double::doubleValue)
                                 .sum();
 
                 return new OccupancyResponse(
-                                premUsage + upgrades,
-                                premRevenue + upgradeRevenue,
-                                econUsage,
-                                econRevenue);
+                                premiumUsage + upgrades,
+                                premiumRevenue + upgradeRevenue,
+                                economyUsage,
+                                economyRevenue);
+        }
+
+        private void validatePotentialGuests(java.util.List<Double> guests) {
+                if (guests.stream().anyMatch(g -> g < 0)) {
+                        throw new InvalidBookingRequestException(
+                                        "All guest willingness to pay values must be non-negative");
+                }
+        }
+
+        private java.util.List<Double> filterAndSortGuests(
+                        java.util.List<Double> guests,
+                        java.util.function.Predicate<Double> filter) {
+                return guests.stream()
+                                .filter(filter)
+                                .sorted(Comparator.reverseOrder())
+                                .toList();
+        }
+
+        private double calculateRevenue(java.util.List<Double> guests, long limit) {
+                return guests.stream()
+                                .limit(limit)
+                                .mapToDouble(Double::doubleValue)
+                                .sum();
         }
 }
