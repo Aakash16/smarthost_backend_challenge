@@ -11,7 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/occupancy", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -27,7 +30,7 @@ public class OccupancyController {
     @Operation(summary = "Calculate room occupancy and revenue", description = "Analyzes potential guests' willingness to pay and allocates them to available premium and economy rooms to maximize revenue.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully calculated occupancy", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = OccupancyResponse.class)) }),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = OccupancyResponse.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content),
             @ApiResponse(responseCode = "415", description = "Unsupported Media Type", content = @Content)
     })
