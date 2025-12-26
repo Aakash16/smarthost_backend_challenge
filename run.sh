@@ -2,5 +2,5 @@
 
 # This file will be included as a Docker ENTRYPOINT in our automated testing evironment. 
 
-echo "Build and Run you server here"
-exit 1
+# Build and start the Spring Boot application
+./gradlew bootRun
