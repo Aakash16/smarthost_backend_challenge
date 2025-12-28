@@ -1,6 +1,16 @@
 #!/usr/bin/env sh
 
-# This file will be included as a Docker ENTRYPOINT in our automated testing evironment. 
+chmod +x gradlew
 
-# Build and start the Spring Boot application
-./gradlew bootRun
+./gradlew clean build -x test --no-daemon
+
+JAR_FILE=$(find build/libs -name "*.jar" ! -name "*-plain.jar" | head -n 1)
+
+if [ -z "$JAR_FILE" ]; then
+    echo "Error: No executable JAR file found in build/libs"
+    exit 1
+fi
+
+echo "Starting application from $JAR_FILE..."
+
+exec java -jar "$JAR_FILE"
