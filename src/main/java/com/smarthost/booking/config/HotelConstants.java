@@ -8,7 +8,7 @@ public final class HotelConstants {
     public static final String MIN_ROOMS_PROP = "hotel.rooms.min";
 
     public static final double DEFAULT_PREMIUM_THRESHOLD = 100.0;
-    public static final long DEFAULT_MIN_ROOMS = 1L;
+    public static final long DEFAULT_MIN_ROOMS = 0L;
 
-    public static final String MIN_ROOMS_ERR = "Rooms count must be at least 1";
+    public static final String MIN_ROOMS_ERR = "Rooms count must be at least 0";
 }

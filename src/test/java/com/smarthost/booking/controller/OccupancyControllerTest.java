@@ -54,7 +54,7 @@ class OccupancyControllerTest {
         }
 
         @Test
-        void emptyGuestList_returns400() throws Exception {
+        void emptyGuestList_returns200() throws Exception {
                 var request = new OccupancyRequest(
                                 5L,
                                 5L,
@@ -63,12 +63,11 @@ class OccupancyControllerTest {
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest());
+                                .andExpect(status().isOk());
         }
 
         @ParameterizedTest(name = "Invalid rooms: P={0}, E={1}")
         @CsvSource({
-                        "0, 0",
                         "-1, 1",
                         "1, -1"
         })
@@ -82,10 +81,10 @@ class OccupancyControllerTest {
         }
 
         @Test
-        void nullGuestList_returns400() throws Exception {
+        void nullGuestList_returns200() throws Exception {
                 String invalidJson = """
                                 {
-                                  "premiumRooms": 1L,
+                                  "premiumRooms": 1,
                                   "economyRooms": 1
                                 }
                                 """;
@@ -93,7 +92,7 @@ class OccupancyControllerTest {
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(invalidJson))
-                                .andExpect(status().isBadRequest());
+                                .andExpect(status().isOk());
         }
 
         @Test

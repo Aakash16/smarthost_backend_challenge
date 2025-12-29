@@ -6,7 +6,9 @@ import com.smarthost.booking.model.OccupancyRequest;
 import com.smarthost.booking.model.OccupancyResponse;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class OccupancyServiceImpl implements OccupancyService {
@@ -19,7 +21,8 @@ public class OccupancyServiceImpl implements OccupancyService {
 
         @Override
         public OccupancyResponse calculateOccupancy(OccupancyRequest request) {
-                var potentialGuests = request.potentialGuests();
+                var potentialGuests = request.potentialGuests() == null ? Collections.<Double>emptyList()
+                                : request.potentialGuests();
                 var availablePremiumRooms = request.premiumRooms();
                 var availableEconomyRooms = request.economyRooms();
 
@@ -53,15 +56,15 @@ public class OccupancyServiceImpl implements OccupancyService {
                                 economyRevenue);
         }
 
-        private void validatePotentialGuests(java.util.List<Double> guests) {
+        private void validatePotentialGuests(List<Double> guests) {
                 if (guests.stream().anyMatch(g -> g < 0)) {
                         throw new InvalidBookingRequestException(
                                         "All guest willingness to pay values must be non-negative");
                 }
         }
 
-        private java.util.List<Double> filterAndSortGuests(
-                        java.util.List<Double> guests,
+        private List<Double> filterAndSortGuests(
+                        List<Double> guests,
                         java.util.function.Predicate<Double> filter) {
                 return guests.stream()
                                 .filter(filter)
@@ -69,7 +72,7 @@ public class OccupancyServiceImpl implements OccupancyService {
                                 .toList();
         }
 
-        private double calculateRevenue(java.util.List<Double> guests, long limit) {
+        private double calculateRevenue(List<Double> guests, long limit) {
                 return guests.stream()
                                 .limit(limit)
                                 .mapToDouble(Double::doubleValue)

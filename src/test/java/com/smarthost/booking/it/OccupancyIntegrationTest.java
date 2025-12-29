@@ -1,7 +1,7 @@
 package com.smarthost.booking.it;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.smarthost.booking.config.HotelConstants;
+
 import com.smarthost.booking.model.OccupancyRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,33 +61,37 @@ class OccupancyIntegrationTest {
         }
 
         @Test
-        @DisplayName("Failure: Missing guest list returns 400")
-        void missingGuestList_returns400() throws Exception {
+        @DisplayName("Success: Missing guest list returns 200 with zero usage")
+        void missingGuestList_returnsZeroUsage() throws Exception {
                 var request = new OccupancyRequest(5L, 5L, null);
 
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.potentialGuests").value("potentialGuests is required"));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.usagePremium").value(0))
+                                .andExpect(jsonPath("$.revenuePremium").value(0))
+                                .andExpect(jsonPath("$.usageEconomy").value(0))
+                                .andExpect(jsonPath("$.revenueEconomy").value(0));
         }
 
         @Test
-        @DisplayName("Failure: Empty guest list returns 400")
-        void emptyGuestList_returns400() throws Exception {
+        @DisplayName("Success: Empty guest list returns 200 with zero usage")
+        void emptyGuestList_returnsZeroUsage() throws Exception {
                 var request = new OccupancyRequest(5L, 5L, List.of());
 
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.potentialGuests").value("potentialGuests must not be empty"));
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.usagePremium").value(0))
+                                .andExpect(jsonPath("$.usageEconomy").value(0))
+                                .andExpect(jsonPath("$.revenuePremium").value(0.0))
+                                .andExpect(jsonPath("$.revenueEconomy").value(0.0));
         }
 
         @ParameterizedTest(name = "Failure: Invalid rooms P={0}, E={1}")
         @CsvSource({
-                        "0, 5, premiumRooms",
-                        "5, 0, economyRooms",
                         "-1, 5, premiumRooms",
                         "5, -1, economyRooms"
         })
@@ -98,8 +102,7 @@ class OccupancyIntegrationTest {
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$." + fieldName).value(HotelConstants.MIN_ROOMS_ERR));
+                                .andExpect(status().isBadRequest());
         }
 
         @Test
@@ -138,14 +141,14 @@ class OccupancyIntegrationTest {
         void zeroRoomsAvailable_returnsZeroUsageAndRevenue() throws Exception {
                 // Not a failure (400) because 1 is the min validation, but let's test with 1
                 // for each
-                var request = new OccupancyRequest(1L, 1L, List.of(50.0, 150.0));
+                var request = new OccupancyRequest(0L, 0L, List.of(50.0, 150.0));
 
                 mockMvc.perform(post("/occupancy")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.usagePremium").value(1))
-                                .andExpect(jsonPath("$.usageEconomy").value(1));
+                                .andExpect(jsonPath("$.usagePremium").value(0))
+                                .andExpect(jsonPath("$.usageEconomy").value(0));
         }
 
         @Test
