@@ -15,9 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping(value = "/guests", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/guests", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Guest", description = "Endpoints for managing guests")
 public class GuestController {
 
@@ -33,10 +34,22 @@ public class GuestController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Guest.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content)
     })
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Guest> createGuest(@Valid @RequestBody Guest guest) {
         Guest createdGuest = guestService.createGuest(guest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdGuest);
+    }
+
+    @Operation(summary = "Create multiple guests", description = "Registers multiple guests in the system at once.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Guests created successfully", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = Guest.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content)
+    })
+    @PostMapping(value = "/batch", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Guest>> createGuests(@Valid @RequestBody List<Guest> guests) {
+        List<Guest> createdGuests = guestService.createGuests(guests);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdGuests);
     }
 
     @Operation(summary = "Get all guests", description = "Retrieves a list of all registered guests.")
@@ -70,7 +83,7 @@ public class GuestController {
             @ApiResponse(responseCode = "404", description = "Guest not found", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content)
     })
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Guest> updateGuest(@PathVariable Long id, @Valid @RequestBody Guest guestDetails) {
         try {
             Guest updatedGuest = guestService.updateGuest(id, guestDetails);

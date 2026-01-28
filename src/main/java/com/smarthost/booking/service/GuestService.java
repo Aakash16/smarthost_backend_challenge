@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public interface GuestService {
     Guest createGuest(Guest guest);
+    List<Guest> createGuests(List<Guest> guests);
     List<Guest> getAllGuests();
     Optional<Guest> getGuestById(Long id);
     Guest updateGuest(Long id, Guest guestDetails);

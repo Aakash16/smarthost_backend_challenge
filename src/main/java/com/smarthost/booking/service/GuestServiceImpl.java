@@ -23,6 +23,11 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
+    public List<Guest> createGuests(List<Guest> guests) {
+        return guestRepository.saveAll(guests);
+    }
+
+    @Override
     public List<Guest> getAllGuests() {
         return guestRepository.findAll();
     }
