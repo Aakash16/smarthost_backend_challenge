@@ -2,8 +2,10 @@ package com.smarthost.booking.service;
 
 import com.smarthost.booking.config.HotelConfiguration;
 import com.smarthost.booking.exception.InvalidBookingRequestException;
+import com.smarthost.booking.model.Guest;
 import com.smarthost.booking.model.OccupancyRequest;
 import com.smarthost.booking.model.OccupancyResponse;
+import com.smarthost.booking.repository.GuestRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -14,17 +16,25 @@ import java.util.List;
 public class OccupancyServiceImpl implements OccupancyService {
 
         private final HotelConfiguration hotelConfiguration;
+        private final GuestRepository guestRepository;
 
-        public OccupancyServiceImpl(HotelConfiguration hotelConfiguration) {
+        public OccupancyServiceImpl(HotelConfiguration hotelConfiguration, GuestRepository guestRepository) {
                 this.hotelConfiguration = hotelConfiguration;
+                this.guestRepository = guestRepository;
         }
 
         @Override
         public OccupancyResponse calculateOccupancy(OccupancyRequest request) {
-                var potentialGuests = request.potentialGuests() == null ? Collections.<Double>emptyList()
-                                : request.potentialGuests();
-                var availablePremiumRooms = request.premiumRooms();
-                var availableEconomyRooms = request.economyRooms();
+                var guestIds = request.getGuestIds() == null ? Collections.<Long>emptyList()
+                                : request.getGuestIds();
+                var availablePremiumRooms = request.getPremiumRooms();
+                var availableEconomyRooms = request.getEconomyRooms();
+
+                List<Guest> guests = guestRepository.findAllById(guestIds);
+                if (guests.size() != guestIds.size()) {
+                        throw new InvalidBookingRequestException("Some guest IDs do not exist");
+                }
+                var potentialGuests = guests.stream().map(Guest::getMaxBudget).toList();
 
                 validatePotentialGuests(potentialGuests);
 
